@@ -1,0 +1,348 @@
+setwd('C:\\Users\\IFE\\Desktop\\freddymac')
+library(data.table)
+dir_list_1 = dir(path="origin",all.files=FALSE)       #set a path for origin data
+dir_list_2 = dir(path="performance",all.files=FALSE)  #set a path for performance data
+for (k in 1 :length(dir_list_1))
+{
+  setwd('C:\\Users\\IFE\\Desktop\\freddymac')    
+  library(data.table)
+  dir_list_1 = dir(path="origin",all.files=FALSE)
+  dir_list_2 = dir(path="performance",all.files=FALSE)
+  spin=sprintf("origin//%s", dir_list_1[k])
+  testdata2=fread(spin,sep='|')
+  spin2=sprintf("performance//%s", dir_list_2[k])
+  testdata<-fread(spin2,nrow=18000000,sep='|')       #read origin data and performance data from computer
+
+
+age=48                                               #set the maximium age we choose 
+ds=2                                                # set the mimimium deliquency status as default
+if(any(testdata[,5,with=FALSE]>age)==TRUE)
+{testset=testdata[-which(testdata[,5,with=FALSE]>age),]
+testset=testset[-which(testset[,5,with=FALSE]==0),]
+}else{
+
+testset=testdata}                               # filter testdata by age
+testset=as.data.frame(testset)                  # change the ' testset' from data table class to dataframe class
+
+indicator=vector()
+indicator<-testset[which(testset[,4]>ds),1]    # match default id by delinquency
+indicator=unique(indicator)                   # get rid of the repeated id
+
+
+new=vector()    
+testdata2=as.data.frame(testdata2)          # change class from ' data table' to 'dataset'
+
+for (i in 1:length(indicator))
+{
+
+  
+    new=rbind(new,which(testdata2[,20]==indicator[i]))
+  
+}                                            #match performance and original data by id 
+new=na.omit(new)
+
+default=testdata2[new,]                        
+nondefault=testdata2[-new,]                            
+default=cbind(default,rep(1,dim(default)[1]))
+nondefault=cbind(nondefault,rep(0,dim(nondefault)[1]))
+indidef=sample(c(1:dim(default)[1]),size=dim(default)[1]/2,replace = FALSE)
+indinondef=sample(c(1:dim(nondefault)[1]),size=dim(nondefault)[1]/20,replace = FALSE)
+defaultsample=default[indidef,]
+nondefaultsample=nondefault[indinondef,]
+
+nam <- paste("defaultsample", k, sep = "")
+nam2 <- paste("nondefaultsample", k, sep = "")
+
+assign(nam,default[indidef,])
+assign(nam2,nondefault[indinondef,])
+
+write.table(defaultsample,nam,append=FALSE,sep='|')
+write.table(nondefaultsample,nam2,append=FALSE,sep='|')
+
+rm(list=ls())
+
+}
+
+dataset=vector()
+for (k in 1:61)
+{
+dir_list_3 = dir(path="default",all.files=FALSE)
+dir_list_4 = dir(path="nondefault",all.files=FALSE)
+spin=sprintf("default//%s", dir_list_3[k])
+testdata2=read.table(spin,sep='|')
+spin2=sprintf("nondefault//%s", dir_list_4[k])
+testdata=read.table(spin2,sep='|')
+names(testdata)[26]='V26'
+names(testdata2)[26]='V26'
+dataset=rbind(dataset,testdata2,testdata)
+}
+write.table(dataset,'dataset',append=FALSE,sep='|')
+
+
+
+newindi3=vector()
+
+for(i in ((dim(dataset)[1]*2/3)+1):dim(dataset)[1])
+{if(dataset[i,26]==0)
+{newindi3=cbind(newindi3,20)
+}
+  else if(dataset[i,26]==1)
+  {newindi3=cbind(newindi3,2)}
+}
+
+newindi=cbind(newindi1,newindi2,newindi3)
+
+dataset=cbind(dataset,newindi)
+
+datasettt=read.table('dataset.txt',sep='|')
+ficox=vector()
+
+for (i in 1:50)
+  {
+   indefault=dataset1[which(dataset1[,1]>(339+i*10)&dataset1[,1]<(350+i*10)),26]
+   ficox=rbind(ficox,length(which(indefault==1))/length(indefault)/10)
+}
+ficox[which(ficox==0)]=NA
+
+xlabel=vector()
+
+for(i in 1:50)
+{xlabel=rbind(xlabel,350+10*i)}
+
+plot(ficox~xlabel,lwd='2')
+
+ltvx=vector()
+for (i in 1:32)
+{
+  indefault=dataset1[which(dataset1[,12]>(-1+i*3)&dataset1[,12]<(3+i*3)),26]
+  ltvx=rbind(ltvx,length(which(indefault==1))/length(indefault)/10)
+}
+
+#ltv[which(is.na(fico))]=fico[4]
+
+xlabel=vector()
+
+for(i in 1:32)
+{xlabel=rbind(xlabel,0+3*i)}
+
+plot(ltvx~xlabel,lwd='2',type='o')
+
+lines(defaultrate~c(45,50,55,60,65,70,75,80,85,90,95),main='LTV',xlab='missing rate=3.2*10^(-5)',type='b')
+
+DT=dataset[which(dataset[,1]>300&dataset[,1]<350),26]
+
+DTI1=dataset[which(dataset[,10]<10),26]
+DTI2=dataset[which(dataset[,10]>9&dataset[,10]<20),26]
+DTI3=dataset[which(dataset[,10]>19&dataset[,10]<30),26]
+DTI4=dataset[which(dataset[,10]>29&dataset[,10]<40),26]
+DTI5=dataset[which(dataset[,10]>39&dataset[,10]<50),26]
+DTI6=dataset[which(dataset[,10]>49&dataset[,10]<60),26]
+DTI7=dataset[which(dataset[,10]>59),26]
+
+a=length(which(DTI1==1))/length(DTI1)/10
+b=length(which(DTI2==1))/length(DTI2)/10
+c=length(which(DTI3==1))/length(DTI3)/10
+d=length(which(DTI4==1))/length(DTI4)/10
+e=length(which(DTI5==1))/length(DTI5)/10
+f=length(which(DTI6==1))/length(DTI6)/10
+g=length(which(DTI7==1))/length(DTI7)/10
+defaultrate=c(a,b,c,d,e,f,g)
+
+lines(defaultrate~c(0,10,20,30,40,50,60),xlab='miss rate=0.01801423',main='DEBT TO INCOME RATIO',type='b',col='blue',lwd=2)
+
+
+PURCH1=dataset[which(dataset[,3]=='N'),26]
+PURCH2=dataset[which(dataset[,3]=='Y'),26]
+a=length(which(PURCH1==1))/length(PURCH1)/10
+b=length(which(PURCH2==1))/length(PURCH2)/10
+defaultrate=c(a,b)
+
+plot(defaultrate~c(1,0),xlab='missing rate=0.22769',ylim=c(0,0.5),xlim=c(0,2),main='first time homebuyer flag  0 = "N"AND 1 = "Y"',type='b')
+
+upbx=vector()
+for (i in 1:39)
+{
+  indefault=dataset1[which(dataset1[,11]>(-1+i*25000)&dataset1[,11]<(25000+i*25000)),26]
+  upbx=rbind(upbx,length(which(indefault==1))/length(indefault)/10)
+}
+
+
+xlabel=vector()
+
+for(i in 1:39)
+{xlabel=rbind(xlabel,25000+25000*i)}
+
+plot(upbx~xlabel,lwd='2',type='o')
+
+
+plot(defaultrate~c(0,50000,100000,150000,200000,250000,300000,350000,400000,450000,500000),main='origin UPB',xlab='missing rate=0',type='b')
+
+
+
+
+LOANPURPOSE1=dataset[which(dataset[,21]=='C'),26]
+LOANPURPOSE2=dataset[which(dataset[,21]=='N'),26]
+LOANPURPOSE3=dataset[which(dataset[,21]=='P'),26]
+
+a=length(which(LOANPURPOSE1==1))/length(LOANPURPOSE1)/10
+b=length(which(LOANPURPOSE2==1))/length(LOANPURPOSE2)/10
+c=length(which(LOANPURPOSE3==1))/length(LOANPURPOSE3)/10
+
+
+defaultrate=c(a,b,c)
+
+plot(defaultrate~c(0,1,2),main='loanpurpose 0="P" 1="C" 2="N"',xlab='missing rate=0',ylim=c(0,0.5),type='b')
+
+weight=t(newindi)
+
+dataset1=data.frame(dataset,weight)
+dataset1$homefirst[which(dataset1$homefirst=='')]='N'
+dataset1$fico[which(is.na(dataset1$fico))]=mean(na.omit(dataset1$fico))
+dataset1$dti[which(is.na(dataset1$dti))]=mean(na.omit(dataset1$dti))
+dataset1$upb[which(is.na(dataset1$upb))]=mean(na.omit(dataset1$upb))
+dataset1$ltv[which(is.na(dataset1$ltv))]=mean(na.omit(dataset1$ltv))
+glmt2 <- glm(dataset1$default~dataset1$fico+dataset1$firsttimehome+dataset1$dti+dataset1$upb+dataset1$ltv+dataset1$loanpurpose,family=binomial,dataset1,weights=weight)
+yweight=predict(glmt2,dataset1,type='response')
+haha=sample(c(1:length(yweight)),size=length(yweight)/100,replace=FALSE)
+yweight1=yweight[haha]
+dti=dataset1$dti[haha]
+ltv=dataset1$ltv[haha]
+upb=dataset1$upb[haha]
+fico=dataset1$fico[haha]
+fthf=dataset1$firsttimehome[haha]
+loanpurpose=dataset1$loanpurpose[haha]
+abline(glmt2)
+points(yweight1~dti)
+
+library(car)
+scatter.smooth(yweight1~dti,lpars =list(col = "red", lwd = 3, lty = 2),col="white",xlab='miss rate=0.01801423',main='DEBT TO INCOME RATIO',ylim=c(0,0.1))
+scatter.smooth(yweight1~ltv,lpars =list(col = "red", lwd = 3, lty = 2),col="white",main='LTV',xlab='missing rate=3.2*10^(-5)',type='b',ylim=c(0,0.1))
+scatter.smooth(yweight1~upb,lpars =list(col = "red", lwd = 3, lty = 2),col="white",main='origin UPB',xlab='missing rate=0',type='b',ylim=c(0,0.1))
+scatter.smooth(yweight1~fico,lpars =list(col = "red", lwd = 3, lty = 2),col="white",main='FICO',xlab='missing rate=0.00245',type='b',ylim=c(0,0.4))
+scatter.smooth(yweight1~loanpurpose,lpars =list(col = "red", lwd = 3, lty = 2),col="white",main='loanpurpose 1="C" 2="N" 3="P"',xlab='missing rate=0',ylim=c(0,0.1),type='b')
+plot(c(Ndefaultrate,Ydefaultrate)~c(1,2),col="red",main='first time homebuyer flag 1="N" 2="Y" ',xlab='missing rate=0.2276892',ylim=c(0,0.1),type='c',lwd=3,lty = 2)
+
+Ndefaultrate=mean(yweight[which(fthf=='N')])
+Ydefaultrate=mean(yweight[which(fthf=='Y')])
+
+
+
+
+lines(ltvx~xlabel,col='blue',lwd=2,type='o')
+lines(upbx~xlabel,col='blue',lwd=2,type='o')
+lines(ficox~xlabel,col='blue',type='o',lwd=2)
+lines(defaultrate~c(1,2,3),ylim=c(0,0.5),lwd=2,col='blue',type='o')
+lines(defaultrate~c(1,2),lwd=2,col='blue')
+
+set.seed(55)
+n <- 100
+x <- c(rnorm(n), 1+rnorm(n))
+y <- c(rep(0,n), rep(1,n))
+r <- glm(y~x, family=binomial)
+plot(y~x)
+abline(lm(y~x),col='red',lty=2)
+xx <- seq(min(x), max(x), length=100)
+yy <- predict(r, data.frame(x=xx))
+lines(xx,yy, col='blue', lwd=5, lty=2)
+title(main='Logistic regression with the "glm" function')
+  
+
+####
+names(dataset1)[1]='fico'
+names(dataset1)[3]='homefirst'
+names(dataset1)[10]='dti'
+names(dataset1)[12]='ltv'
+names(dataset1)[11]='upb'
+names(dataset1)[21]='loanpurpose'
+names(dataset1)[26]='default'
+
+fico1=dataset1$fico
+
+fico1[which(fico1>620)]=620
+
+fico2=dataset1$fico
+fico2[which(fico2<621)]=0
+fico2[which(fico2<721&fico2>620)]=fico2[which(fico2<721&fico2>620)]-620
+fico2[which(fico2>720)]=720
+
+
+
+fico3=dataset1$fico
+fico3[which(fico3<721)]=0
+fico3[which(fico3>720)]=fico3[which(fico3>720)]-720
+
+
+
+ltv1=dataset1$ltv
+ltv1[which(ltv1>65)]=65
+
+ltv2=dataset1$ltv
+ltv2[which(ltv2<66)]=0
+ltv2[which(ltv2<81&ltv2>65)]=ltv2[which(ltv2<81&ltv2>65)]-65
+ltv2[which(ltv2>80)]=80
+
+
+
+ltv3=dataset1$ltv
+ltv3[which(ltv3<81)]=0
+ltv3[which(ltv3>80)]=ltv3[which(ltv3>80)]-80
+
+dti1=dataset1$dti
+dti1[which(dti1>20)]=20
+
+dti2=dataset1$dti
+dti2[which(dti2<21)]=0
+dti2[which(dti2<41&dti2>20)]=dti2[which(dti2<41&dti2>20)]-20
+dti2[which(dti2>40)]=40
+
+
+
+dti3=dataset1$dti
+dti3[which(dti3<41)]=0
+dti3[which(dti3>40)]=dti3[which(dti3>40)]-40
+
+
+upb1=dataset1$upb
+upb1[which(upb1>400000)]=400000
+
+upb2=dataset1$upb
+upb2[which(upb2<400001)]=0
+upb2[which(upb2<600001&upb2>400000)]=upb2[which(upb2<600001&upb2>400000)]-400000
+upb2[which(upb2>600000)]=600000
+
+
+
+upb3=dataset1$upb
+upb3[which(upb3<400001)]=0
+upb3[which(upb3>400000)]=upb3[which(upb3>400000)]-400000
+
+glmt2 <- glm(dataset1$default~fico1+fico2+fico3+dataset1$homefirst+dti1+dti2+dti3+upb1+upb2+upb3+ltv1+ltv2+ltv3+dataset1$loanpurpose,family=binomial,dataset1,weights=weight)
+yweight=predict(glmt2,dataset1,type='response')
+haha=sample(c(1:length(yweight)),size=length(yweight)/100,replace=FALSE)
+yweight1=yweight[haha]
+dti1=dti1[haha]
+dti2=dti2[haha]
+dti3=dti3[haha]
+ltv1=ltv1[haha]
+ltv2=ltv2[haha]
+ltv3=ltv3[haha]
+
+fico1=fico1[haha]
+fico2=fico2[haha]
+fico3=fico3[haha]
+            
+ltv=dataset1$ltv[haha]
+upb=dataset1$upb[haha]
+fico=dataset1$fico[haha]
+fthf=dataset1$firsttimehome[haha]
+loanpurpose=dataset1$loanpurpose[haha]
+
+library(car)
+scatter.smooth(yweight1~l1,lpars =list(col = "red", lwd = 3, lty = 2),col="white",xlab='miss rate=0.01801423',main='DEBT TO INCOME RATIO',ylim=c(-0.1,0.4),xlim=c(0,620))
+
+scatter.smooth(yweight1~ltv1,lpars =list(col = "red", lwd = 3, lty = 2),col="white",main='LTV',xlab='missing rate=3.2*10^(-5)',type='b',ylim=c(0,0.1))
+scatter.smooth(yweight1~upb,lpars =list(col = "red", lwd = 3, lty = 2),col="white",main='origin UPB',xlab='missing rate=0',type='b',ylim=c(0,0.1))
+scatter.smooth(yweight1~fico,lpars =list(col = "red", lwd = 3, lty = 2),col="white",main='FICO',xlab='missing rate=0.00245',type='b',ylim=c(0,0.4))
+scatter.smooth(yweight1~loanpurpose,lpars =list(col = "red", lwd = 3, lty = 2),col="white",main='loanpurpose 1="C" 2="N" 3="P"',xlab='missing rate=0',ylim=c(0,0.1),type='b')
+plot(yweight1~ltv1,ylim=c(0,0.1))
+lines(lowess(yweight1~ltv1, f=0.1), col="blue")
